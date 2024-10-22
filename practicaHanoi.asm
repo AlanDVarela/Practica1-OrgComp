@@ -4,20 +4,23 @@
 #Descripcion: Resolver el problema de las torres de Hanoi
 #             utilizando un algoritmo recursivo en RISC V
 
-.text
-
+.data
+	torreA: .word 0x10010000        # Dirección para la torre A
+.text 
+    addi s0, zero, 3                # Número de discos, cambiar aquí para N discos
+    la   a1, torreA                 # Dirección de Torre A (origen)
+   
+# Distribuir los discos en la torre de origen (Torre A)
+    addi   t0, zero, 1              # Contador de discos
+inicializarTorreA:
+    bgt  t0, s0, main	            # Si t0 > s0, terminar la inicialización
+    sw   t0, 0(a1)        	        # Colocar el disco en la torre A
+    addi a1, a1, 32                 # Avanzar a la siguiente posición en torre A
+    addi t0, t0, 1                  # Incrementar el contador de discos
+    j    inicializarTorreA          # Repetir el ciclo
 main:
-    addi sp, sp, -16    # Reservar espacio en el stack
-    sw ra, 12(sp)       # Guardar el valor de ra en el stack
-    sw s0, 8(sp)        # Guardar s0 en el stack
-
-    addi t0, zero, 3    # Definir el numero de discos (3 discos)
-    addi t1, zero, 0    # Definir el disco inicial (0 = A)
-    addi t2, zero, 1    # Definir el disco final (1 = B)
-    addi t3, zero, 2    # Definir el disco final (2 = C)
-    jal hanoi           # Llamar a la funcion hanoi
-
-
-hanoi: #Entradas a0 - torre origen, a1, - torre destino, a2 - torre aux
-    addi sp, sp, -16    # Reservar espacio en el stack
-    sw t0, 0(sp)        # Guardar el numero de discos en el stack
+    #Parametros funcion "hanoi(int n, char origen, char destino, char auxiliar)"
+    addi   a0, s0, 0                # N discos
+    li   a1, 0x10010000             # Direccion de Torre A
+    li   a2, 0x10010004             # Direccion de Torre B
+    li   a3, 0x10010008             # Direccion de Torre C
