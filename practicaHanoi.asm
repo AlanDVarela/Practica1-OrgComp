@@ -1,25 +1,27 @@
-# Practica 1: Torres de Hanoi - Simulación de registros
+# Practica 1: Torres de Hanoi - Simulación de registros y memoria
 # Fecha: 24 - Oct - 2024
 # Autor: Alan David Varela Maldonado
 # Descripcion: Simulación de las Torres de Hanoi
-#              Visualizando únicamente el comportamiento en los registros
-# Definimos las direcciones de las torres solo como referencia para cargar los valores
- .data
-    torreA: .word 0x10010000    # Dirección base de Torre A
-.text
-     addi s0, zero, 3              # Número de discos, cambiar aquí para N discos
-     la   a1, torreA                 # Dirección de Torre A (origen)
-     
-     #Distribuir los discos en la torre de origen (Torre A)
-    addi   t0, zero, 1              # Contador de discos
+#              Visualizando el comportamiento en los registros y memoria
+
+    .data
+        torreA: .word 0x10010000    # Dirección base de Torre A
+
+    .text
+
+    addi s0, zero, 3           # Número de discos, cambiar aquí para N discos
+    la   a1, torreA               # Cargar la dirección de Torre A (origen)
+
+    # Inicializar Torre A con los discos
+    addi   t0, zero, 1            # Contador de discos
 inicializarTorreA:
-    bgt  t0, s0, main	            # Si t0 > s0, terminar la inicialización
-    sw   t0, 0(a1)        	    # Colocar el disco en la torre A
-    addi a1, a1, 32                 # Avanzar a la siguiente posición en torre A
-    addi t0, t0, 1                  # Incrementar el contador de discos
-    j    inicializarTorreA          # Repetir el ciclo
-    
-main: 
+    bgt    t0, s0, main  # Si t0 > s0, terminar la inicialización
+    sw     t0, 0(a1)              # Colocar el disco en la torre A
+    addi   a1, a1, 32             # Avanzar a la siguiente posición en la torre A (desplazamiento de 32 bytes por disco)
+    addi   t0, t0, 1              # Incrementar el contador de discos
+    j      inicializarTorreA       # Repetir el ciclo para el siguiente disco
+
+main:
     # Parámetros iniciales para las torres A, B y C
     la   a1, torreA               # Dirección de Torre A (origen)
     li   a2, 0x10010008           # Dirección de Torre C (destino)
@@ -90,11 +92,38 @@ mover_disco:
     mv t0, a0        # Guardar el número de disco en t0 (número de disco)
     mv t1, a1        # Guardar la dirección de la torre origen en t1
     mv t2, a2        # Guardar la dirección de la torre destino en t2
-    # Visualizar en memoria moviemiento disco
     
-    
-    
-    
-    
-    
-    jr ra            # Retornar de la función mover_disco
+    # Simular el movimiento del disco en la memoria
+    # Buscar el disco en la torre origen y eliminarlo
+    addi s2, s0, -1            #Variable para guardar n discos - 1, para guardar en memoria
+    addi s5, zero, 0         	# Iniciar el contador de desplazamientos en la torre origen
+    addi t3, a1, 0           	# Iniciar en la dirección base de la torre origen
+buscar_disco_origen:
+    lw t4, 0(t3)             	# Leer la posición actual en la torre origen
+    bgt t4, zero, disco_encontrado_origen # Si encontramos el disco, saltamos
+    addi t3, t3, 32          # Avanzar a la siguiente fila (desplazamiento de 32)
+    addi s5, s5, 1          # Incrementar el contador de desplazamiento
+    blt s5, s2, buscar_disco_origen # Si no llegamos al límite (3 discos), continuar
+
+disco_encontrado_origen:
+    sw zero, 0(t3)           # Eliminar el disco de la torre origen (poner 0)
+
+    # Colocar el disco en la torre destino
+    addi s5, zero, 0         # Iniciar el contador de desplazamientos en la torre destino
+    addi t3, a2, 0           # Iniciar en la dirección base de la torre destino
+    lw t4, 0(t3)             # Leer la posición actual en la torre destino
+buscar_espacio_destino:
+    addi s5, s5, 1          # Incrementar el contador de desplazamiento
+    addi t3, t3, 32          # Avanzar a la siguiente fila
+    lw t4, 0(t3)             # Leer la posición actual en la torre destino
+    bgt t4, zero, colocar_disco_anterior # Si hay un disco, retroceder una posición
+    blt s5, s2, buscar_espacio_destino # Si no hemos llegado al límite, seguir buscando
+    j colocar_disco_final    # Si llegamos al final, colocar el disco ahí
+
+colocar_disco_anterior:
+    addi t3, t3, -32         # Retroceder una posición
+colocar_disco_final:
+    sw t0, 0(t3)             # Colocar el disco en la torre destino
+
+final_mover_disco:
+    jr ra                    # Retornar de la función mover_disco
