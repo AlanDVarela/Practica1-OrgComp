@@ -72,21 +72,20 @@ mover_disco:
     add t5, a2, t6                # Sumar el resultado de la multiplicación a la dirección base de la torre destino
 
 buscar_espacio:
-
-    lw t4, 0(a2)                                # Cargar el valor de la torre en la posición actual
-    bge t4, zero ,insertar_disco_anterior       # Si la posición es mayor a 0, insertar disco en posicion anterior
-    addi a2, a2, 32                             # Avanzar a la siguiente posición en la torre (32 bytes)
-    blt a2, t5, buscar_espacio      # Si aún no se llega al límite, repetir ciclo
-    j insertar_disco      # Si se llega al límite y no encontro disco insertar
-    ret 
+    lw t4, 0(a2)                   # Cargar el valor en la posición actual de la torre destino
+    bgt t4, zero, insertar_disco_anterior  # Si la posición está ocupada (t4 > 0), retroceder para insertar disco en la posición anterior
+    addi a2, a2, 32                # Avanzar a la siguiente posición en la torre (32 bytes)
+    blt a2, t5, buscar_espacio      # Si no hemos llegado al límite, seguir buscando
+    j insertar_disco               # Si llegamos al final y no encontramos posición ocupada, insertar el disco en la última posición
 
 insertar_disco_anterior:
-    addi a2, a2, -32                             # Retroceder a la posición anterior
-    j insertar_disco                            # Insertar disco en la posición anterior
+    addi a2, a2, -32               # Retroceder a la posición anterior
+    j insertar_disco               # Saltar para insertar el disco en la posición anterior
+
 insertar_disco:
-    # Insertar disco en la posición actual
-    sw a0, 0(a2)                                # Insertar disco en la posición actual
-    ret
+    sw a0, 0(a2)                   # Insertar el disco en la posición actual
+    ret                            # Retornar
+
 
     # Mover los n-1 discos de auxiliar a destino
     lw a0, 16(sp)                 # Restaurar n
