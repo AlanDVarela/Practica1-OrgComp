@@ -32,8 +32,7 @@ main:
     jal   ra, hanoi               # Llamar a hanoi(3, A, C, B)
 
     # Fin del programa
-    li   a7, 10                   #Salir
-    ecall
+    exit: 	j exit
 
 # Función recursiva hanoi(n, origen, destino, auxiliar)
 # Parámetros:
