@@ -43,7 +43,7 @@ main:
 #   a3: auxiliar (dirección de la torre auxiliar)
 hanoi:
     # Caso base: si n == 1, mover un solo disco
-    beq t1, s2, mover_disco           # Si n == 1, saltar a mover_disco
+    beq a0, s2, mover_disco           # Si n == 1, saltar a mover_disco
 
     # Guardar registros en el stack antes de la llamada recursiva
     addi sp, sp, -20              # Reservar espacio en el stack
